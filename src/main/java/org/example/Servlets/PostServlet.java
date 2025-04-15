@@ -40,11 +40,12 @@ public class PostServlet extends HttpServlet {
             writer.write("<!DOCTYPE html>\n" +
                     "<html lang=\"en\">\n" +
                     "<head>\n" +
-                    "    <title>Post</title>\n" +
+                    "    <title>Anonbook</title>\n" +
                     "    <script src=\"anonbook.js\"></script>" +
                     "    <meta charset=\"UTF-8\">\n" +
                     "</head>\n" +
                     "<body>");
+            writer.write("<h1>Anonbook</h1>");
             writer.write("<button type=\"button\" onclick=\"openPopup()\">Add Post</button>\n");
             for (Post post : posts){
                 LocalDateTime time = post.getDateTime().toLocalDateTime();
