@@ -1,5 +1,6 @@
 package org.example.Enteties;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.sql.Date;
@@ -9,13 +10,19 @@ import java.time.ZoneId;
 @Entity
 @Table(name = "\"Comment\"")
 public class Comment {
+    @JsonIgnore
     @Id
-    @JoinColumn(name = "\"post\"", referencedColumnName = "id")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    private String id;
+
     @Column(name = "\"postId\"", nullable = false)
     private String postId;
-    @Column(name = "text", nullable = true)
+    @Column(name = "text")
     private String text;
-    @Column(name = "date", nullable = true)
+
+    @JsonIgnore
+    @Column(name = "date")
     private Date date;
 
     public Comment() {
@@ -40,6 +47,14 @@ public class Comment {
 
     public Date getDate() {
         return date;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setDateToNow() {

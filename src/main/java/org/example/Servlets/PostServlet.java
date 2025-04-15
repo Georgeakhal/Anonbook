@@ -38,7 +38,7 @@ public class PostServlet extends HttpServlet {
                     "<html lang=\"en\">\n" +
                     "<head>\n" +
                     "    <title>Post</title>\n" +
-                    "    <script type=\"text/javascript\" src=\"src/main/webapp/anonbook.js\"></script>\n" +
+                    "    <script src=\"anonbook.js\"></script>" +
                     "    <meta charset=\"UTF-8\">\n" +
                     "</head>\n" +
                     "<body>");
@@ -48,8 +48,7 @@ public class PostServlet extends HttpServlet {
                 writer.write( "<h5>" + post.getHead() +"</h5>");
                 writer.write("<img src=data:image/" + post.getImg() + " width=\"600\" height=\"400\" alt=\"Post image\" >");
                 writer.write("<form method=\"get\" action=\"http://localhost:8080/comment\" enctype=\"multipart/form-data\">");
-                writer.write("<input name = \"postId\" type=\"text\" id=\"myInput\" style=\"display: none;\" value=" + post.getId() + ">");
-                writer.write("<button type=\"button\" onclick=\"handleClick(" + post.getHead() + "," + post.getImg() + ")\">View Post</button>");
+                writer.write("<button type=\"button\" onclick=\"handleClick('" + post.getId() + "', '" + post.getHead() + "', '" + post.getImg() + "')\">View Post</button>");
                 writer.write("</form>");
             }
             writer.write("</body>\n" +

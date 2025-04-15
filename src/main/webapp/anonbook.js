@@ -1,5 +1,4 @@
 
-
 function addPost() {
    let head = document.querySelector('input.form1[name="head"]').value;
    let imgInput = document.querySelector('input.form1[name="img"]');
@@ -71,66 +70,101 @@ function openPopup() {
   `);
 }
 
- window.onload = function () {
-      fetch("/get")
-        .then(res => res.json())
-        .then(posts => {
-          const container = document.getElementById("postContainer");
-
-          posts.reverse().forEach(post => {
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = `
-              <h2>${post.head}</h2>
-              <img src="data:image/jpeg;base64,${post.img}" style="max-width:300px;" />
-              <hr/>
-            `;
-            container.prepend(wrapper); // Add to the top
-          });
-        })
-        .catch(err => console.error("Failed to fetch posts", err));
-    };
-
-
- handleClick(id, head, imgURL){
-     window.location.assign("post.html");
+//window.onload = function () {
+//      fetch("/get")
+//        .then(res => res.json())
+//        .then(posts => {
+//          const container = document.getElementById("postContainer");
+//
+//          posts.reverse().forEach(post => {
+//            const wrapper = document.createElement("div");
+//            wrapper.innerHTML = `
+//              <h2>${post.head}</h2>
+//              <img src="data:image/jpeg;base64,${post.img}" style="max-width:300px;" />
+//              <hr/>
+//            `;
+//            container.prepend(wrapper); // Add to the top
+//          });
+//        })
+//        .catch(error => console.error('Error:', error));;
+//    };
 
 
-          fetch(url, {
-              method: "GET"
-          })
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error(`HTTP error! Status: ${response.status}`);
-              }
-              return response.json();
-          })
-          .then(json => {
-              const postId = document.querySelector('input.form1[name="postId"]');
-              postId.Value = id
+function handleClick(id, head, imgURL) {
+    sessionStorage.setItem("postId", id);
+    sessionStorage.setItem("postHead", head);
+    sessionStorage.setItem("postImg", imgURL);
+    window.location.assign("post.html");
+}
 
-              const div = document.getElementsByTagName("div");
+document.addEventListener("DOMContentLoaded", () => {
+    const id = sessionStorage.getItem("postId");
+    const head = sessionStorage.getItem("postHead");
+    const imgURL = sessionStorage.getItem("postImg");
 
-              const header =  document.createElement('h4');
-              header.textContent = head;
+    document.querySelector('input[name="postId"]').value = id;
 
-              div.appendChild(header);
+    const container = document.querySelector("div");
 
-              const img = document.createElement('img');
+    const header = document.createElement("h4");
+    header.textContent = head;
+    container.appendChild(header);
 
-              img.src = "data:image/" + imgURL;
+    const img = document.createElement("img");
+    img.src = "data:image/" + imgURL;
+    container.appendChild(img);
 
-              div.appendChild(img);
-
-
-              for (let i = 0; i < json.length; i++){
-                const p = document.createElement('p');
-                p.textContent = json[i].text
-                div.appendChild(p);
-              }
-          })
-          .catch(error => {
-              console.error('Error:', error);
-              alert(error.message);
-          });
+    fetch(`http://localhost:8080/comment?postId=${encodeURIComponent(id)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
       }
- }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+
+        data.forEach(comment => {
+                const p = document.createElement("p");
+                p.textContent = comment.text;
+                container.appendChild(p);
+        });
+
+      })
+      .catch(error => {
+        console.error("Fetch failed", error);
+      });
+});
+
+function handleComments() {
+  const postId = document.querySelector('input[name="postId"]').value;
+  const text = document.querySelector('input[name="text"]').value;
+
+  fetch('http://localhost:8080/comment', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ postId, text })
+  })
+    .then(async response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const text = await response.text();
+      return text ? JSON.parse(text) : {};
+    })
+    .then(data => {
+      console.log("Comment added:", data);
+      location.reload();
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Failed to post comment.");
+    });
+}
+

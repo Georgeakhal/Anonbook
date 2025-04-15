@@ -11,10 +11,11 @@
 
 </div>
 
-<form method="get" action="http://localhost:8080/comment" enctype="multipart/form-data">
-    <input name = "postId" type="text" id=\"myInput\" style="display: none;">
-    <input name = "head" type="text">
-    <button type="button" >Add Comment</button>
+
+<form id="form" method="post" enctype="multipart/form-data">
+    <input type="text" name="postId" style="display: none;">
+    <input type="text" name="text">
+    <button type="button" onclick="handleComments()" >Add Comment</button>
 </form>
 </body>
 </html>
