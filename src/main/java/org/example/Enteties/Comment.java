@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 @Entity
@@ -22,8 +24,8 @@ public class Comment {
     private String text;
 
     @JsonIgnore
-    @Column(name = "date")
-    private Date date;
+    @Column(name = "\"dateTime\"")
+    private Timestamp dateTime;
 
     public Comment() {
         setDateToNow();
@@ -45,8 +47,8 @@ public class Comment {
         this.text = text;
     }
 
-    public Date getDate() {
-        return date;
+    public Timestamp getDate() {
+        return dateTime;
     }
 
     public String getId() {
@@ -58,6 +60,6 @@ public class Comment {
     }
 
     public void setDateToNow() {
-        this.date = Date.valueOf(LocalDate.now());
+        this.dateTime = Timestamp.valueOf(LocalDateTime.now());
     }
 }

@@ -1,35 +1,58 @@
-
 function addPost() {
-   let head = document.querySelector('input.form1[name="head"]').value;
-   let imgInput = document.querySelector('input.form1[name="img"]');
-   let file = imgInput.files[0];
+  let head = document.querySelector('input.form1[name="head"]').value;
+  let imgInput = document.querySelector('input.form1[name="img"]');
+  let file = imgInput.files[0];
 
-   const reader = new FileReader();
+  if (!file) {
+    const jsonData = {
+      head: head,
+      img: null
+    };
 
-     reader.onload = function(event) {
-       const base64Image = event.target.result;
+    fetch("/post", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(jsonData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Server response:", data);
+      window.close();
+      window.opener.location.reload();
+    })
+    .catch(err => console.error("Error:", err));
+  } else {
+    const reader = new FileReader();
 
-       const jsonData = {
-         head: head,
-         img: base64Image
-       };
+    reader.onload = function(event) {
+      const base64Image = event.target.result;
 
-       // Send JSON
-       fetch("/post", {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json"
-         },
-         body: JSON.stringify(jsonData)
-       })
-       .then(res => res.json())
-       .then(data => console.log("Server response:", data))
-       .catch(err => console.error("Error:", err));
-     };
+      const jsonData = {
+        head: head,
+        img: base64Image
+      };
 
-     reader.readAsDataURL(file)
+      fetch("/post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(jsonData)
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Server response:", data);
+        window.opener.location.reload();
+      })
+      .catch(err => console.error("Error:", err));
+    };
 
+    reader.readAsDataURL(file);
+  }
 }
+
 
 function openPopup() {
   const popup = window.open("", "popupWindow", "width=400,height=300,left=100,top=100");
@@ -70,30 +93,11 @@ function openPopup() {
   `);
 }
 
-//window.onload = function () {
-//      fetch("/get")
-//        .then(res => res.json())
-//        .then(posts => {
-//          const container = document.getElementById("postContainer");
-//
-//          posts.reverse().forEach(post => {
-//            const wrapper = document.createElement("div");
-//            wrapper.innerHTML = `
-//              <h2>${post.head}</h2>
-//              <img src="data:image/jpeg;base64,${post.img}" style="max-width:300px;" />
-//              <hr/>
-//            `;
-//            container.prepend(wrapper); // Add to the top
-//          });
-//        })
-//        .catch(error => console.error('Error:', error));;
-//    };
-
-
-function handleClick(id, head, imgURL) {
+function handleClick(id, head, imgURL, time) {
     sessionStorage.setItem("postId", id);
     sessionStorage.setItem("postHead", head);
     sessionStorage.setItem("postImg", imgURL);
+    sessionStorage.setItem("dateTime", time);
     window.location.assign("post.html");
 }
 
@@ -101,18 +105,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const id = sessionStorage.getItem("postId");
     const head = sessionStorage.getItem("postHead");
     const imgURL = sessionStorage.getItem("postImg");
+    const time = sessionStorage.getItem("dateTime");
 
     document.querySelector('input[name="postId"]').value = id;
 
     const container = document.querySelector("div");
 
+
+    const pa = document.createElement("p");
+
+    pa.textContent = time;
+    pa.style.opacity = "0.5";
+    container.appendChild(pa);
+
     const header = document.createElement("h4");
     header.textContent = head;
     container.appendChild(header);
 
-    const img = document.createElement("img");
-    img.src = "data:image/" + imgURL;
-    container.appendChild(img);
+    if (
+      imgURL &&
+      typeof imgURL === "string" &&
+      imgURL.trim().toLowerCase() !== "null" &&
+      imgURL.trim() !== ""
+    ) {
+      const img = document.createElement("img");
+      img.width = 400;
+      img.height = 400;
+      img.src = "data:image/" + imgURL;
+      container.appendChild(img);
+    } else {
+      console.log("Image not provided or invalid.");
+    }
+
 
     fetch(`http://localhost:8080/comment?postId=${encodeURIComponent(id)}`, {
       method: 'GET',
@@ -127,13 +151,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return response.json();
       })
       .then(data => {
+        for (let i = 0; i < data.length; i++) {
+                    const p = document.createElement("p");
 
-        data.forEach(comment => {
-                const p = document.createElement("p");
-                p.textContent = comment.text;
-                container.appendChild(p);
-        });
+                    let num = i + 1;
 
+                    p.textContent = "N" + num.toString() + " " + data[i].text;
+                    container.appendChild(p);
+                }
       })
       .catch(error => {
         console.error("Fetch failed", error);

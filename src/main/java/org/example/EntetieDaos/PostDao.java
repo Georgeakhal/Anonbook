@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PostDao {
-    private final Connector con = new Connector();
+    private final Connector con = Connector.getInstance();
 
     public static PostDao dao = null;
 
@@ -34,13 +34,14 @@ public class PostDao {
         Root<Post> root = cq.from(Post.class);
 
         cq.select(root);
+        cq.orderBy(con.getCb().asc(root.get("dateTime")));
 
         TypedQuery<Post> query = con.getEm().createQuery(cq);
 
         return query.getResultList();
     }
 
-    public Post getPostById(int id){
+    public Post getPostById(String id){
         return con.getEm().find(Post.class, id);
     }
 }

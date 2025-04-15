@@ -29,16 +29,13 @@ public class CommentServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        BufferedReader reader = req.getReader();
-        StringBuilder sb = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line);
-        }
-        System.out.println("RAW REQUEST BODY: " + sb.toString());
+        Comment comment = mapper.readValue(req.getReader(), Comment.class);
 
-        ObjectMapper mapper = new ObjectMapper();
-        Comment comment = mapper.readValue(sb.toString(), Comment.class); // crash point
+        if (comment.getText().isBlank() | comment.getText().isEmpty()){
+            System.out.println("doPost:: Text input must be filled");
+            resp.sendError(HttpServletResponse.SC_UNPROCESSABLE_CONTENT, "Text input must be filled");
+            return;
+        }
 
         comment.setDateToNow();
         resp.setStatus(HttpServletResponse.SC_CREATED);

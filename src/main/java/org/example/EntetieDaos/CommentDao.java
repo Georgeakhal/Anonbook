@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommentDao {
-    private final Connector con = new Connector();
+    private final Connector con = Connector.getInstance();
 
     private static CommentDao dao = null;
 

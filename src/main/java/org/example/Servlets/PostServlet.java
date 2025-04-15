@@ -13,6 +13,7 @@ import org.example.EntetieDaos.PostDao;
 import org.example.Enteties.Post;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -31,6 +32,8 @@ public class PostServlet extends HttpServlet {
         List<Post> posts = postDao.getPosts();
         super.init();
         File file = new File(INDEX_HTML_PATH);
+        int num = 1;
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 
 
@@ -44,12 +47,24 @@ public class PostServlet extends HttpServlet {
                     "<body>");
             writer.write("<button type=\"button\" onclick=\"openPopup()\">Add Post</button>\n");
             for (Post post : posts){
+                LocalDateTime time = post.getDateTime().toLocalDateTime();
+                String stringTime = time.getHour() + ": " + time.getMinute() + " " + time.getDayOfMonth() + "/" + time.getMonthValue() + "/" + time.getYear();
+
                 writer.write("<br>");
+                writer.write("<button type=\"button\" onclick=\"handleClick('" + post.getId() + "', '" + post.getHead() + "', '" + post.getImg() + "', '" + stringTime + "')\">View Post</button>");
+                writer.write("<p style=\"opacity: 0.5;\">N" + num + " " + stringTime + "</p>");
                 writer.write( "<h5>" + post.getHead() +"</h5>");
-                writer.write("<img src=data:image/" + post.getImg() + " width=\"600\" height=\"400\" alt=\"Post image\" >");
+
+                if (post.getImg() == null || post.getImg().isBlank()) {
+                    continue;
+                } else{
+                    writer.write("<img src=data:image/" + post.getImg() + " width=\"300\" height=\"200\" alt=\"Post image\" >");
+                }
+
                 writer.write("<form method=\"get\" action=\"http://localhost:8080/comment\" enctype=\"multipart/form-data\">");
-                writer.write("<button type=\"button\" onclick=\"handleClick('" + post.getId() + "', '" + post.getHead() + "', '" + post.getImg() + "')\">View Post</button>");
                 writer.write("</form>");
+
+                num ++;
             }
             writer.write("</body>\n" +
                     "</html>");
@@ -58,10 +73,24 @@ public class PostServlet extends HttpServlet {
         }
     }
 
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Post post = mapper.readValue(req.getReader(), Post.class);
+
+        System.out.println(post.getHead());
+
+        if (post.getHead().isBlank() | post.getHead().isEmpty()){
+            System.out.println("doPost:: Head input must be filled");
+            resp.sendError(HttpServletResponse.SC_UNPROCESSABLE_CONTENT, "Head input must be filled");
+            return;
+        }
+
         post.setId(UUID.randomUUID().toString());
+
+        postDao.getPostById(post.getId());
+
+        post.setDateTimeToNow();
         resp.setStatus(HttpServletResponse.SC_CREATED);
         postDao.createPost(post);
     }

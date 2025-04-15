@@ -12,18 +12,15 @@ public class Connector {
 
     private static Connector con = null;
 
-    public Connector(){
-//        con = new Connector();
+    private Connector() {
     }
 
-//    public static Connector getInstance(){
-//        if (con == null){
-//            con = new Connector();
-//            return new Connector();
-//        } else {
-//            return con;
-//        }
-//    }
+    public static Connector getInstance() {
+        if (con == null) {
+            con = new Connector();
+        }
+        return con;
+    }
 
     public EntityManagerFactory getEmf() {
         return emf;
